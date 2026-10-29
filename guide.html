@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tota 사용 설명서</title>
+<style>
+:root { --purple: #6B34D6; --purple-soft: #F2EDFD; --ink: #191923; --gray: #73798B; --line: #E6E7EC; --bg: #ffffff; --soft: #F7F7FA; }
+@media (prefers-color-scheme: dark) { :root { --ink: #F2F2F5; --gray: #A0A4B2; --line: #2C2C35; --bg: #121216; --soft: #1C1C22; --purple: #9B7BF0; --purple-soft: #241C38; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif; line-height: 1.7; }
+main { max-width: 760px; margin: 0 auto; padding: 40px 16px 72px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+header .name { font-weight: 800; font-size: 26px; color: var(--purple); letter-spacing: -0.02em; text-decoration: none; }
+header a.back { font-size: 14px; color: var(--gray); text-decoration: none; }
+h1 { font-size: 30px; line-height: 1.3; margin: 28px 0 6px; letter-spacing: -0.01em; }
+.lead { font-size: 17px; color: var(--gray); margin: 0 0 20px; }
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 8px; }
+.steps3 div { background: var(--purple-soft); border-radius: 16px; padding: 14px 12px; text-align: center; font-size: 15px; font-weight: 600; }
+.steps3 b { display: block; color: var(--purple); font-size: 13px; margin-bottom: 2px; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
+nav.toc a { font-size: 14px; text-decoration: none; color: var(--ink); background: var(--soft); border-radius: 999px; padding: 6px 12px; }
+section { display: grid; grid-template-columns: 1fr 230px; gap: 28px; align-items: start; padding: 36px 0; border-top: 1px solid var(--line); }
+section.wide { grid-template-columns: 1fr; }
+/* 화면이 두 장이면 글 아래에 나란히 */
+section.duo { grid-template-columns: 1fr; }
+section.duo .shots { max-width: 480px; }
+section .num { color: var(--purple); font-weight: 700; font-size: 14px; }
+h2 { font-size: 22px; line-height: 1.35; margin: 2px 0 10px; }
+h3 { font-size: 17px; margin: 18px 0 4px; }
+p, li { font-size: 16px; }
+ul { padding-left: 20px; margin: 8px 0; }
+li { margin: 4px 0; }
+.shot { width: 100%; border-radius: 28px; border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(25, 25, 35, 0.10); display: block; }
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.shots figcaption { font-size: 13px; color: var(--gray); text-align: center; margin-top: 6px; }
+figure { margin: 0; }
+.tip { background: var(--purple-soft); border-radius: 14px; padding: 12px 16px; margin: 14px 0 0; font-size: 15px; }
+.tip b { color: var(--purple); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 13px; background: var(--purple-soft); color: var(--purple); font-size: 13px; font-weight: 700; vertical-align: 1px; }
+.card { background: var(--soft); border-radius: 16px; padding: 16px 20px; margin: 12px 0; }
+.muted { color: var(--gray); font-size: 14px; }
+a { color: var(--purple); }
+footer { margin-top: 48px; font-size: 13px; color: var(--gray); }
+@media (max-width: 640px) {
+  section { grid-template-columns: 1fr; gap: 16px; }
+  section > figure, section > .shots { max-width: 260px; margin: 0 auto; width: 100%; }
+  section > .shots { max-width: 100%; }
+  .steps3 div { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="name" href="index.html">tota</a>
+    <a class="back" href="index.html">고객 지원 ›</a>
+  </header>
+
+  <h1>tota 사용 설명서</h1>
+  <p class="lead">마트에서 가격표를 카메라로 비추면, 담은 금액이 바로 쌓여요. 계산대 가기 전에 얼마인지 미리 알 수 있어요.</p>
+
+  <div class="steps3">
+    <div><b>1</b>카메라 버튼</div>
+    <div><b>2</b>가격표 비추기</div>
+    <div><b>3</b>담기</div>
+  </div>
+
+  <nav class="toc">
+    <a href="#start">처음 켜면</a>
+    <a href="#scan">가격표 비추기</a>
+    <a href="#promo">1+1 · 2+1</a>
+    <a href="#cart">담은 목록</a>
+    <a href="#edit">고치기 · 온라인 가격</a>
+    <a href="#done">장보기 끝</a>
+    <a href="#history">장보기 기록</a>
+    <a href="#travel">해외여행</a>
+    <a href="#tips">잘 읽히는 법</a>
+    <a href="#faq">알아 두세요</a>
+  </nav>
+
+  <section id="start">
+    <div>
+      <div class="num">01</div>
+      <h2>처음 켜면</h2>
+      <p>가입이나 로그인 없이 바로 시작해요. 처음 화면은 비어 있는 장바구니예요.</p>
+      <ul>
+        <li>오른쪽 아래 <b>카메라 버튼</b>을 누르면 가격표를 비추는 화면이 열려요.</li>
+        <li>아래 검은 영역에 지금까지 담은 <b>합계</b>가 보여요.</li>
+        <li>장바구니가 비어 있을 땐 합계 위 카드에 이달의 제철 식재료, 지난 장보기, 보관법, 사용 팁이 번갈아 나와요. 카드를 누르면 다음 내용으로 넘어가요.</li>
+        <li>오른쪽 위 버튼은 차례로 <span class="btn">기록</span> <span class="btn">여행</span> <span class="btn">설정</span>이에요.</li>
+      </ul>
+    </div>
+    <figure><img class="shot" src="guide/01-empty.jpg" alt="비어 있는 장바구니 화면" loading="lazy"></figure>
+  </section>
+
+  <section id="scan">
+    <div>
+      <div class="num">02</div>
+      <h2>가격표 비추기</h2>
+      <p>가격표를 화면 가운데 <b>보라색 틀</b> 안에 맞추면, 셔터를 누르지 않아도 알아서 읽어요.</p>
+      <ul>
+        <li>읽으면 아래에 <b>"가격표 읽음"</b> 카드가 떠요. 상품 이름과 가격을 확인하고 <b>+ 담기</b>를 누르면 끝이에요.</li>
+        <li>카드 할인가가 있으면 옆에 작게 같이 보여줘요. 합계엔 일반 가격이 들어가요.</li>
+        <li>담을 때마다 위쪽 합계가 바로 올라가요.</li>
+        <li>셔터 아래 <b>"담은 목록"</b>을 밀어 올리면, 찍는 중에도 지금까지 담은 걸 볼 수 있어요.</li>
+      </ul>
+      <h3>잘 안 읽힐 때</h3>
+      <ul>
+        <li>셔터를 눌러 한 장 찍으면 더 꼼꼼하게 읽어요.</li>
+        <li>오른쪽 <span class="btn">#</span> 버튼을 누르면 키패드로 가격을 바로 넣을 수 있어요.</li>
+        <li>왼쪽 사진 버튼으로 앨범에 있는 가격표 사진을 불러올 수도 있어요.</li>
+      </ul>
+    </div>
+    <figure><img class="shot" src="guide/02-scan.jpg" alt="가격표를 비춰서 읽은 화면" loading="lazy"></figure>
+  </section>
+
+  <section id="promo">
+    <div>
+      <div class="num">03</div>
+      <h2>1+1 · 2+1 행사</h2>
+      <p>가격표에 1+1, 2+1이 있으면 알아서 계산해요.</p>
+      <ul>
+        <li><b>담기 한 번</b>에 한 세트가 들어가요. 1+1이면 2개, 2+1이면 3개가 담기고, 공짜로 받는 만큼은 합계에서 빠져요.</li>
+        <li>목록에서 수량을 바꿔도 행사 규칙대로 다시 계산해요.</li>
+        <li>"2개 5,000원" 같은 묶음 가격이면, 하나씩 담을지 묶음으로 담을지 물어봐요.</li>
+      </ul>
+    </div>
+    <figure><img class="shot" src="guide/03-promo.jpg" alt="1+1 가격표를 읽은 화면" loading="lazy"></figure>
+  </section>
+
+  <section id="cart">
+    <div>
+      <div class="num">04</div>
+      <h2>담은 목록</h2>
+      <p>카메라를 닫으면 담은 상품이 영수증처럼 쌓여 있어요.</p>
+      <ul>
+        <li>방금 담은 걸 빼고 싶으면 합계 옆 <b>되돌리기</b>를 누르세요.</li>
+        <li>상품을 <b>왼쪽으로 밀면</b> 지울 수 있어요.</li>
+        <li>상품을 <b>누르면</b> 가격, 수량, 이름을 고칠 수 있어요.</li>
+      </ul>
+    </div>
+    <figure><img class="shot" src="guide/04-cart.jpg" alt="담은 상품 목록과 합계" loading="lazy"></figure>
+  </section>
+
+  <section id="edit">
+    <div>
+      <div class="num">05</div>
+      <h2>고치기 · 온라인은 얼마지?</h2>
+      <p>목록에서 상품을 누르면 열리는 화면이에요.</p>
+      <ul>
+        <li>키패드로 가격을 고치고, <span class="btn">−</span> <span class="btn">+</span>로 수량을 바꿔요.</li>
+        <li>맨 위 이름을 눌러 상품 이름을 고칠 수 있어요. 잘못 읽힌 이름을 몇 글자 고치면 tota가 기억했다가, <b>다음에 같은 이름이 잘못 읽히면 알아서 고쳐요.</b></li>
+        <li><b>"온라인은 얼마지?"</b>를 누르면 그 상품 이름으로 온라인 쇼핑몰을 검색해요. 앱을 나가지 않고 바로 비교할 수 있어요.</li>
+      </ul>
+      <p class="tip"><b>쇼핑몰 바꾸기</b> · 오른쪽 위 <span class="btn">설정</span>에서 어느 쇼핑몰에서 찾을지 고를 수 있어요.</p>
+    </div>
+    <figure><img class="shot" src="guide/05-edit.jpg" alt="상품 고치기 화면" loading="lazy"></figure>
+  </section>
+
+  <section id="done">
+    <div>
+      <div class="num">06</div>
+      <h2>장보기 끝</h2>
+      <p>목록 아래 <b>장보기 끝</b>을 누르면 오늘 장보기를 정리해 줘요.</p>
+      <ul>
+        <li>상품 개수, 합계, 1+1·2+1로 아낀 돈을 보여줘요.</li>
+        <li><b>끝내고 기록 남기기</b>를 누르면 오늘 장보기가 기록에 남고 장바구니가 비워져요.</li>
+        <li>아직 더 살 게 있으면 <b>계속 담기</b>를 누르세요.</li>
+      </ul>
+    </div>
+    <figure><img class="shot" src="guide/06-done.jpg" alt="장보기 끝 요약 화면" loading="lazy"></figure>
+  </section>
+
+  <section id="history">
+    <div>
+      <div class="num">07</div>
+      <h2>장보기 기록</h2>
+      <p>오른쪽 위 <span class="btn">기록</span> 버튼을 누르면 지난 장보기를 볼 수 있어요.</p>
+      <ul>
+        <li>이번 달에 몇 번, 얼마나 썼는지와 지난달보다 늘었는지 줄었는지 보여줘요.</li>
+        <li>주별 막대로 언제 많이 샀는지 한눈에 볼 수 있어요.</li>
+        <li>날짜별 영수증을 누르면 그날 산 상품이 나와요.</li>
+        <li>같은 상품을 지난번과 다른 가격에 샀으면 <b>가격이 바뀐 상품</b>으로 알려줘요.</li>
+      </ul>
+    </div>
+    <figure><img class="shot" src="guide/07-history.jpg" alt="장보기 기록 화면" loading="lazy"></figure>
+  </section>
+
+  <section id="travel" class="duo">
+    <div>
+      <div class="num">08</div>
+      <h2>해외여행 장보기</h2>
+      <p>일본, 미국, 유럽 마트에서도 쓸 수 있어요. 평소 장바구니는 그대로 두고 여행에서 담은 건 따로 모아요.</p>
+      <ul>
+        <li>오른쪽 위 <span class="btn">여행</span> 버튼을 누르고 나라를 고르세요.</li>
+        <li>예산은 눈금을 밀어서 정해요. 금액 아래에 여행지 돈으로 얼마쯤인지 같이 보여줘요. 안 정해도 돼요.</li>
+        <li>그 나라 가격표(엔·달러·유로)를 읽고, 오늘 환율로 바꾼 원화를 같이 보여줘요.</li>
+        <li>가게를 옮기면 <b>다음 가게</b>를 눌러 가게별로 나눠 볼 수 있어요.</li>
+        <li>일본에선 한 가게에서 면세 기준 금액(세전 5,000엔)까지 얼마 남았는지 막대로 보여줘요.</li>
+        <li>여행 중엔 여행 버튼이 보라색으로 채워져요. 그 버튼을 누르면 여행을 끝낼 수 있고, 장바구니 버튼을 누르면 평소 장보기로 돌아가요.</li>
+      </ul>
+    </div>
+    <div class="shots">
+      <figure><img class="shot" src="guide/08-trip-start.jpg" alt="여행 시작 화면" loading="lazy"><figcaption>나라와 예산 고르기</figcaption></figure>
+      <figure><img class="shot" src="guide/09-trip-cart.jpg" alt="여행 중 장바구니 화면" loading="lazy"><figcaption>여행지 돈 + 원화</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="tips" class="wide">
+    <div>
+      <div class="num">09</div>
+      <h2>가격표가 잘 읽히는 법</h2>
+      <ul>
+        <li>가격표 <b>하나만</b> 틀 안에 꽉 차게 비춰 주세요. 옆 가격표가 같이 들어오면 다른 숫자를 읽을 수 있어요.</li>
+        <li>조명이 반사돼 숫자가 하얗게 날아가면, 폰을 살짝 기울여 주세요.</li>
+        <li>너무 가까우면 초점이 안 맞아요. 한 뼘쯤 떨어져서 비춰 주세요.</li>
+        <li>읽은 가격이 이상하면 담기 전에 카드에 보이는 숫자를 꼭 확인해 주세요.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="faq" class="wide">
+    <div>
+      <div class="num">10</div>
+      <h2>알아 두세요</h2>
+      <div class="card"><p><b>계산대 금액과 다를 수 있어요.</b><br>무게로 파는 상품, 계산대에서 붙는 할인, 미국 판매세처럼 가격표에 없는 금액은 알 수 없어요. 차이가 나는 상품은 눌러서 고쳐 주세요.</p></div>
+      <div class="card"><p><b>환율은 참고용이에요.</b><br>유럽중앙은행 기준환율이라 카드 결제 금액과 조금 다를 수 있어요.</p></div>
+      <div class="card"><p><b>내 정보는 폰 안에만 있어요.</b><br>회원가입이 없고, 가격표 사진은 폰 안에서만 읽고 어디에도 보내지 않아요. 자세한 내용은 <a href="privacy.html">개인정보 처리방침</a>을 봐 주세요.</p></div>
+      <p class="muted">더 궁금한 점은 <a href="index.html">고객 지원</a>에서 자주 묻는 질문과 문의 방법을 확인해 주세요.</p>
+    </div>
+  </section>
+
+  <footer><a href="index.html">고객 지원</a> · <a href="privacy.html">개인정보 처리방침</a> · © 2026 tota</footer>
+</main>
+</body>
+</html>
