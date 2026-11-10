@@ -1,0 +1,46 @@
+# tota 앱 제철 카드용 이번 주 소매가 (data/prices.json). 하루 한 번, 손으로도 돌릴 수 있다.
+# 키: Settings → Secrets and variables → Actions → DATA_GO_KR_SERVICE_KEY (공공데이터포털 디코딩 키)
+name: prices
+
+on:
+  schedule:
+    - cron: "30 7 * * *"   # 매일 16:30 (한국 시간). 소매가는 보통 오후에 올라온다
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: prices
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 규칙 확인
+        run: python3 tools/prices/fetch.py --test
+      - name: 가격 받기
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: python3 tools/prices/fetch.py data/prices.json
+      - name: 바뀌었으면 올리기
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- data/prices.json && git ls-files --error-unmatch data/prices.json >/dev/null 2>&1; then
+            echo "바뀐 값 없음"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json
+          git commit -m "이번 주 소매가 $(date -u +%F)"
+          git push
+          # Actions 토큰으로 올린 커밋은 Pages가 다시 안 지을 수 있어서 직접 부탁한다
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" >/dev/null || echo "Pages 다시 짓기 요청 실패 (다음 푸시 때 반영)"
