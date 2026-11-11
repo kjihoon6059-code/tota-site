@@ -372,6 +372,8 @@ def fetch_online(key, today):
                 try:
                     rows = online_paged(key, "getPriceInfo", {"itemCode": code, "startDate": frm.strftime("%Y%m%d"), "endDate": to.strftime("%Y%m%d")})
                 except RuntimeError as e:
+                    if "NO MSG" in str(e):  # 그 기간 데이터가 아직 없다 (한 달쯤 늦게 채워진다) → 더 앞 기간
+                        continue
                     print(f"{name} (온라인 {code} {frm}~{to}): {e}", file=sys.stderr)
                     break
                 got = summarize_online(name, rows, must, avoid)
