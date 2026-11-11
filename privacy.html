@@ -38,6 +38,7 @@ footer { margin-top: 48px; font-size: 13px; color: var(--gray); }
     <tr><td>담은 상품 이름, 가격, 수량, 여행 기록</td><td>장바구니 합계를 보여주기 위해</td><td>앱에서 지우거나 앱을 삭제</td></tr>
     <tr><td>이용자가 고친 상품 이름 (예: 잘못 읽힌 이름 → 고친 이름)</td><td>다음에 같은 이름이 잘못 읽히면 알아서 고치기 위해</td><td>앱 삭제</td></tr>
     <tr><td>마지막으로 받은 환율</td><td>인터넷이 없을 때도 원화로 바꿔 보여주기 위해</td><td>앱 삭제</td></tr>
+    <tr><td>마지막으로 받은 이번 주 장바구니 물가, 그날 보여 준 '오늘 뭐 먹지' 메뉴 (1.1부터)</td><td>인터넷이 없을 때도 보여주고, 같은 날엔 같은 메뉴를 보여주기 위해</td><td>앱 삭제</td></tr>
     <tr><td>처음 설치한 날짜</td><td>앱 기능 안내에 쓰기 위해 (이용자를 알아볼 수 없는 정보)</td><td>기기 초기화</td></tr>
   </table>
 
@@ -52,6 +53,8 @@ footer { margin-top: 48px; font-size: 13px; color: var(--gray); }
 
   <p>'오늘의 정보' 화면은 제철 재료·보관법과 관련된 유튜브 영상의 썸네일 이미지를 유튜브 이미지 서버(i.ytimg.com)에서 불러와 보여줍니다. 이때 이용자 정보는 보내지 않으며 기기의 IP 주소만 전달됩니다. 영상은 앱 안에서 재생하거나 내려받지 않고, 썸네일이나 '유튜브에서 더 보기'·'블로그 글 보기'를 누르면 유튜브·네이버 검색 페이지가 앱 안 브라우저로 열립니다. 그 뒤의 정보 처리는 해당 서비스의 개인정보 처리방침을 따릅니다.</p>
 
+  <p>1.1 버전부터 제철 재료 카드와 '오늘 뭐 먹지'에 쓰는 이번 주 농축수산물 소매가를 tota 사이트(kjihoon6059-code.github.io)의 가격 파일 한 개로 받아옵니다. 이 파일은 공공데이터포털에 공개된 한국농수산식품유통공사·국가데이터처·한국소비자원 가격 자료를 모은 것이고, 모든 이용자가 같은 파일을 받습니다. 최대 6시간에 한 번 요청하며, 이용자 정보는 보내지 않고 기기의 IP 주소만 전달됩니다. '오늘 뭐 먹지'에서 '만드는 법 영상'·'블로그 글'을 누르면 메뉴 이름이 검색어로 유튜브·네이버 검색 페이지에 전달되어 앱 안 브라우저로 열립니다.</p>
+
   <h2>4. 제3자 제공</h2>
   <p>개인정보를 수집하지 않으므로 제3자에게 제공하거나 처리를 맡기지 않습니다.</p>
 
@@ -65,7 +68,7 @@ footer { margin-top: 48px; font-size: 13px; color: var(--gray); }
   <p>이 방침이 바뀌면 이 페이지에 시행일과 함께 알립니다.</p>
 
   <div class="card">
-    <p><b>English summary.</b> tota does not collect any personal data. Cart items, exchange rates and the install date are stored only on your device. Price tags are read on device with Apple's Vision framework; photos are never uploaded. Foreign product names are translated on device with a built-in glossary and Apple's Translation framework. The app requests public exchange rates from Frankfurter (api.frankfurter.dev) without sending any user data. When you tap "온라인은 얼마지?" on an item, the product name is sent as a search query to the shopping site you chose in Settings. The "Today's info" screen loads YouTube video thumbnails from i.ytimg.com (no user data is sent); tapping a video or search button opens YouTube or Naver in an in-app browser. No ads, analytics or accounts.</p>
+    <p><b>English summary.</b> tota does not collect any personal data. Cart items, exchange rates and the install date are stored only on your device. Price tags are read on device with Apple's Vision framework; photos are never uploaded. Foreign product names are translated on device with a built-in glossary and Apple's Translation framework. The app requests public exchange rates from Frankfurter (api.frankfurter.dev) without sending any user data. When you tap "온라인은 얼마지?" on an item, the product name is sent as a search query to the shopping site you chose in Settings. The "Today's info" screen loads YouTube video thumbnails from i.ytimg.com (no user data is sent); tapping a video or search button opens YouTube or Naver in an in-app browser. From version 1.1, the app downloads one public price file (weekly retail food prices compiled from Korean public data) from the tota site (kjihoon6059-code.github.io) at most every 6 hours; every user gets the same file and no user data is sent. Tapping a recipe search in "오늘 뭐 먹지" sends the menu name as a search query to YouTube or Naver. No ads, analytics or accounts.</p>
   </div>
 
   <footer>© 2026 tota</footer>
