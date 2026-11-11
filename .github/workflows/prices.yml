@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "30 7 * * *"   # 매일 16:30 (한국 시간). 소매가는 보통 오후에 올라온다
   workflow_dispatch:
+    inputs:
+      probe:
+        description: "코드 찾기만 (예: 200/265 500/512). 비우면 평소처럼 가격 받기"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -26,11 +31,19 @@ jobs:
           python-version: "3.12"
       - name: 규칙 확인
         run: python3 tools/prices/fetch.py --test
+      - name: 코드 찾기
+        if: ${{ github.event.inputs.probe != '' && github.event.inputs.probe != null }}
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+          PROBE: ${{ github.event.inputs.probe }}
+        run: python3 tools/prices/fetch.py --probe $PROBE
       - name: 가격 받기
+        if: ${{ github.event.inputs.probe == '' || github.event.inputs.probe == null }}
         env:
           DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
         run: python3 tools/prices/fetch.py data/prices.json
       - name: 바뀌었으면 올리기
+        if: ${{ github.event.inputs.probe == '' || github.event.inputs.probe == null }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

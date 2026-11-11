@@ -166,6 +166,26 @@ def unit_label(row):
     return f"{size_text}{unit}" if not unit.startswith(size_text) else unit
 
 
+# 개·포기·마리로 파는 품목의 한 개 무게(g). 메뉴 표(MenuBook)의 양과 맞춘다.
+# KAMIS의 kg 환산값(exmn_dd_cnvs_prc)은 이런 단위에서 낱개 값을 그대로 주고, 고기는 품목이 달라도 같은 값이 와서 안 쓴다.
+PIECE_GRAMS = {
+    "귤": 100, "오이": 200, "수박": 7000, "배": 600, "사과": 300, "복숭아": 250, "참외": 400, "바나나": 120,
+    "배추": 2000, "무": 1500, "양배추": 2000, "애호박": 300, "브로콜리": 300, "파프리카": 200, "고구마": 200, "감자": 150,
+    "고등어": 400, "갈치": 400, "오징어": 300, "동태": 500, "전어": 100, "꽃게": 300, "새우": 25, "계란": 60,
+}
+
+
+def per_kg_of(name, unit, price):
+    """'100g' '2kg' '10개' '1포기' '30구' 단위의 값 → kg당 값. 모르면 None."""
+    import re as _re
+    m = _re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*(kg|g|개|포기|마리|구|송이|통|단|봉)\s*", unit or "")
+    if not m or not price:
+        return None
+    n, u = float(m.group(1)), m.group(2)
+    grams = n * 1000 if u == "kg" else n if u == "g" else n * PIECE_GRAMS.get(name, 0)
+    return round(price / grams * 1000) if grams > 0 else None
+
+
 def summarize(name, rows):
     """시장별 행들 → {key, unit, price, weekAgo, date}. 쓸 만한 게 없으면 None."""
     rows = [r for r in rows if str(r.get("se_cd", RETAIL)) == RETAIL and (number(r.get("exmn_dd_prc")) or 0) > 0]
@@ -194,7 +214,7 @@ def summarize(name, rows):
     day = max(by_day)
     d = dt.datetime.strptime(day, "%Y%m%d").date()
     out = {"key": name, "unit": unit_label(chosen[0]), "price": average(by_day[day], "exmn_dd_prc"), "date": d.isoformat()}
-    per_kg = average(by_day[day], "exmn_dd_cnvs_prc")
+    per_kg = per_kg_of(name, out["unit"], out["price"])
     if per_kg:
         out["perKg"] = per_kg
     for gap in (0, -1, 1, -2, 2):
@@ -212,10 +232,11 @@ def summarize(name, rows):
 ONLINE_API = "https://apis.data.go.kr/1240000/bpp_openapi"
 ONLINE_SOURCE = "국가데이터처 온라인 수집 가격"
 ONLINE_DAYS = 70
-# (앱 재료 이름, 품목 이름에 들어갈 말, 상품 이름에 꼭 있어야 할 말 중 하나, 빼야 할 말)
+# 2026-11 품목 목록에 두부·떡·어묵은 없다(목록에 생기면 그때 붙는다).
+# (앱 재료 이름, 품목 이름이 시작하는 말, 상품 이름에 꼭 있어야 할 말 중 하나, 빼야 할 말)
 ONLINE_ITEMS = [
     ("두부", ["두부"], ["두부"], ["순두부", "연두부", "유부", "과자", "스낵", "면", "콩물", "강아지"]),
-    ("칼국수 면", ["국수", "면"], ["칼국수"], ["라면", "컵", "스프", "육수"]),
+    ("칼국수 면", ["국수"], ["칼국수"], ["라면", "컵", "스프", "육수"]),
     ("떡", ["떡"], ["떡볶이떡", "떡볶이 떡", "떡볶이용", "밀떡", "쌀떡"], ["소스", "양념", "밀키트", "컵", "즉석"]),
     ("어묵", ["어묵"], ["어묵"], ["탕", "소스", "꼬치"]),
     ("당면", ["당면"], ["당면"], ["잡채밀키트", "컵", "만두"]),
@@ -336,17 +357,24 @@ def fetch_online(key, today):
         print(f"온라인 가격 품목 목록: {e}", file=sys.stderr)
         return []
     print("온라인 가격 품목: " + ", ".join(f"{r.get('in')}({r.get('ic')})" for r in catalog), file=sys.stderr)
-    start = (today - dt.timedelta(days=ONLINE_DAYS)).strftime("%Y%m%d")
-    end = today.strftime("%Y%m%d")
     out = []
     for name, item_words, must, avoid in ONLINE_ITEMS:
-        codes = [r.get("ic") for r in catalog if any(w in (r.get("in") or "") for w in item_words)]
+        # 품목 이름이 같은 말로 시작하는 것만. 코드는 7자리(새 코드)를 먼저
+        codes = [r.get("ic") for r in catalog if any((r.get("in") or "").startswith(w) for w in item_words)]
+        codes = sorted(dict.fromkeys(codes), key=lambda c: (-len(c or ""), c))
         got = None
-        for code in codes[:3]:
-            try:
-                got = summarize_online(name, online_paged(key, "getPriceInfo", {"itemCode": code, "startDate": start, "endDate": end}), must, avoid)
-            except RuntimeError as e:
-                print(f"{name} (온라인 {code}): {e}", file=sys.stderr)
+        for code in codes[:2]:
+            for back in range(4):
+                to = today - dt.timedelta(days=29 * back)
+                frm = to - dt.timedelta(days=28)
+                try:
+                    rows = online_paged(key, "getPriceInfo", {"itemCode": code, "startDate": frm.strftime("%Y%m%d"), "endDate": to.strftime("%Y%m%d")})
+                except RuntimeError as e:
+                    print(f"{name} (온라인 {code} {frm}~{to}): {e}", file=sys.stderr)
+                    break
+                got = summarize_online(name, rows, must, avoid)
+                if got:
+                    break
             if got:
                 break
         if got:
@@ -415,7 +443,15 @@ def self_test():
             row("20261031", "a", "4,400"), row("20261031", "b", "4,200"),
             row("20261107", "a", "3,000", grade="중품"), row("20261107", "c", "9,999", vrty="01", size="5")]
     s = summarize("귤", rows)
-    assert s == {"key": "귤", "unit": "10개", "price": 3980, "perKg": 3680, "weekAgo": 4300, "date": "2026-11-07"}, s
+    # 10개 3,980원, 귤 한 개 100g → kg 3,980원 (KAMIS 환산값 3,680 은 안 쓴다)
+    assert s == {"key": "귤", "unit": "10개", "price": 3980, "perKg": 3980, "weekAgo": 4300, "date": "2026-11-07"}, s
+    assert per_kg_of("돼지고기 앞다리", "100g", 1598) == 15980
+    assert per_kg_of("포도", "2kg", 10207) == 5104
+    assert per_kg_of("깻잎", "50g", 1442) == 28840
+    assert per_kg_of("계란", "30구", 7271) == 4039
+    assert per_kg_of("배추", "1포기", 2712) == 1356
+    assert per_kg_of("새우", "10마리", 5455) == 21820
+    assert per_kg_of("모르는것", "1개", 1000) is None
     # 7일 전이 없으면 하루 앞뒤에서 찾는다
     s = summarize("배추", [row("20261107", "a", "3120", unit="포기", size="1"), row("20261101", "a", "3500", unit="포기", size="1")])
     assert s["weekAgo"] == 3500 and s["unit"] == "1포기", s
@@ -457,8 +493,35 @@ def self_test():
     print("ok")
 
 
+def probe(codes):
+    """--probe 200/265 500/512: 최근 15일 행을 구분(소매·중도매)·품종·등급·단위별로 센다. 데이터 없음 품목 코드 찾기용."""
+    key = service_key()
+    today = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()
+    for code in codes:
+        ctgry, item = code.split("/")
+        rows, page = [], 1
+        while True:
+            got, total = rows_of(get_json({
+                "serviceKey": key, "returnType": "JSON", "pageNo": page, "numOfRows": 1000,
+                "cond[exmn_ymd::GTE]": (today - dt.timedelta(days=DAYS)).strftime("%Y%m%d"),
+                "cond[exmn_ymd::LTE]": today.strftime("%Y%m%d"),
+                "cond[ctgry_cd::EQ]": ctgry, "cond[item_cd::EQ]": item,
+            }))
+            rows += got
+            if not got or len(rows) >= total or page >= 5:
+                break
+            page += 1
+        counts = {}
+        for r in rows:
+            k = (r.get("se_cd"), r.get("vrty_cd"), r.get("vrty_nm"), r.get("grd_nm"), unit_label(r))
+            counts[k] = counts.get(k, 0) + 1
+        print(f"{code}: {len(rows)}행 " + (", ".join(f"{k}={v}" for k, v in sorted(counts.items(), key=lambda kv: -kv[1])[:12]) or "없음"))
+
+
 if __name__ == "__main__":
     if sys.argv[1:] == ["--test"]:
         self_test()
+    elif sys.argv[1:2] == ["--probe"]:
+        probe(sys.argv[2:])
     else:
         main(sys.argv[1] if len(sys.argv) > 1 else "data/prices.json")
