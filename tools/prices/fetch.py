@@ -11,7 +11,7 @@
 - 날짜별로 전국 시장 평균을 내서
 - 가장 최근 조사일 값과 그 7일 전(앞뒤 2일 안에서 가장 가까운 날) 값을 남긴다.
 
-두부·면·떡처럼 KAMIS에 없는 가공식품은 '국가데이터처_온라인 수집 가격 정보'
+두부·면·떡처럼 KAMIS에 없는 가공식품은 (두부·어묵은 한국소비자원 참가격 월간 파일, 나머지는) '국가데이터처_온라인 수집 가격 정보'
 (https://apis.data.go.kr/1240000/bpp_openapi, 같은 키로 활용신청)에서 받는다.
 온라인 쇼핑몰 상품마다 이름에서 무게를 읽어 kg당 값을 내고, 가운데 값을 쓴다.
 이 API는 한 달쯤 늦게 채워질 수 있어서 최근 70일 안에서 가장 새 값을 쓴다. 못 받아도 실패로 치지 않는다.
@@ -22,7 +22,9 @@
     DATA_GO_KR_SERVICE_KEY=... python3 tools/prices/fetch.py data/prices.json
     python3 tools/prices/fetch.py --test    # 키 없이 묶는 규칙만 확인
 """
+import csv
 import datetime as dt
+import io
 import json
 import re
 import statistics
@@ -389,6 +391,82 @@ def fetch_online(key, today):
     return out
 
 
+# ---------- 가공식품 2: 한국소비자원 참가격 (마트 조사값, 한 달에 한 번 파일) ----------
+
+CHAMGA_PAGE = ("15083256", "uddi:bc228824-01df-4fb9-9d74-9f6c09e50738")  # 한국소비자원_생필품 가격 정보
+CHAMGA_SOURCE = "한국소비자원 참가격"
+# (앱 재료 이름, 상품 이름에 꼭 있어야 할 말 중 하나, 빼야 할 말). 온라인 값이 없을 때 쓴다.
+CHAMGA_ITEMS = [
+    ("두부", ["두부"], ["진밥", "이유식", "순두부", "연두부", "유부", "과자"]),
+    ("어묵", ["어묵"], ["어묵탕", "탕", "소스", "꼬치"]),
+    ("당면", ["당면"], ["잡채", "컵"]),
+    ("마른미역", ["자른미역", "옛날 미역", "건미역"], ["국", "컵", "밥"]),
+]
+
+
+def chamga_csv():
+    """공공데이터포털 파일데이터의 지금 파일을 받는다 (로그인 없이). CP949 CSV 글자."""
+    pk, detail = CHAMGA_PAGE
+    req = urllib.request.Request("https://www.data.go.kr/tcs/dss/selectFileDataDownload.do", data=urllib.parse.urlencode({
+        "publicDataDetailPk": detail, "publicDataPk": pk, "atchFileId": "", "fileDetailSn": "1", "publicDataTyCode": "PR0051",
+    }).encode())
+    with urllib.request.urlopen(req, timeout=40) as r:
+        info = json.loads(r.read().decode("utf-8"))
+    if not info.get("status") or not info.get("atchFileId"):
+        raise RuntimeError(f"파일 정보 없음: {str(info)[:200]}")
+    url = "https://www.data.go.kr/cmm/cmm/fileDownload.do?" + urllib.parse.urlencode({"atchFileId": info["atchFileId"], "fileDetailSn": info.get("fileDetailSn") or 1})
+    with urllib.request.urlopen(url, timeout=120) as r:
+        raw = r.read()
+    for enc in ("utf-8-sig", "cp949"):
+        try:
+            return raw.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return raw.decode("cp949", "replace")
+
+
+def summarize_chamga(name, rows, must, avoid):
+    """참가격 행(상품명·조사일·판매가격) → 가장 최근 조사일의 kg당 값 가운데 값. 상품 셋 미만이면 None."""
+    by_day = {}
+    for r in rows:
+        title = r.get("상품명", "")
+        if not any(m in title for m in must) or any(a in title for a in avoid):
+            continue
+        grams, price = grams_of(title), number(r.get("판매가격"))
+        day = (r.get("조사일") or "")[:10]
+        if grams and price and price > 0 and len(day) == 10:
+            by_day.setdefault(day, []).append((title, price / grams * 1000))
+    if not by_day:
+        return None
+    day = max(by_day)
+    values = by_day[day]
+    if len({t for t, _ in values}) < 2 or len(values) < 5:
+        return None
+    per_kg = round(statistics.median(v for _, v in values) / 10) * 10
+    return {"key": name, "unit": "1kg", "price": per_kg, "perKg": per_kg, "date": day, "source": CHAMGA_SOURCE}
+
+
+def fetch_chamga(names):
+    """names 중 참가격에 있는 것. 실패해도 빈 목록."""
+    wanted = [i for i in CHAMGA_ITEMS if i[0] in names]
+    if not wanted:
+        return []
+    try:
+        rows = list(csv.DictReader(io.StringIO(chamga_csv())))
+    except (RuntimeError, OSError, ValueError) as e:
+        print(f"참가격 파일: {e}", file=sys.stderr)
+        return []
+    out = []
+    for name, must, avoid in wanted:
+        got = summarize_chamga(name, rows, must, avoid)
+        if got:
+            print(f"{name}: kg {got['perKg']:,}원 {got['date']} 참가격")
+            out.append(got)
+        else:
+            print(f"{name}: 참가격 값 없음", file=sys.stderr)
+    return out
+
+
 def main(path):
     key = service_key()
     today = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()
@@ -420,6 +498,7 @@ def main(path):
     if fresh == 0:
         sys.exit("하나도 못 받았어요. 키·승인 상태를 확인해 주세요. 파일은 그대로 둡니다.")
     online = {i["key"]: i for i in fetch_online(key, today)}
+    online.update({i["key"]: i for i in fetch_chamga({n for n, *_ in ONLINE_ITEMS} - set(online))})
     for name, *_ in ONLINE_ITEMS:
         if name in online:
             items.append(online[name])
@@ -501,6 +580,15 @@ def self_test():
         raise AssertionError("게이트웨이 오류를 놓침")
     except RuntimeError as e:
         assert "30" in str(e), e
+    # 참가격: 진밥처럼 엉뚱한 상품은 빼고, 가장 최근 조사일만
+    cg = [{"상품명": t, "조사일": d, "판매가격": p} for t, d, p in [
+        ("국산콩두부 찌개용(380g)", "2026-10-23", "3,040"), ("국산콩두부 찌개용(380g)", "2026-10-23", "3,040"),
+        ("행복한콩 부침두부(300g)", "2026-10-23", "1,800"), ("행복한콩 찌개두부(300g)", "2026-10-23", "2,100"),
+        ("행복한콩 찌개두부(300g)", "2026-10-23", "2,100"), ("소고기와두부진밥(100g)", "2026-10-23", "3,000"),
+        ("행복한콩 부침두부(300g)", "2026-10-09", "9,999")]]
+    s = summarize_chamga("두부", cg, ["두부"], ["진밥"])
+    assert s == {"key": "두부", "unit": "1kg", "price": 7000, "perKg": 7000, "date": "2026-10-23", "source": CHAMGA_SOURCE}, s
+    assert summarize_chamga("두부", cg[:2], ["두부"], []) is None
     print("ok")
 
 
