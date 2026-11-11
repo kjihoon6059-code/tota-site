@@ -56,7 +56,7 @@ ITEMS = [
     # 늘 사는 채소·과일
     ("대파", one("200", "246", "00")), ("무", one("200", "231")), ("당근", one("200", "232")),
     ("양배추", one("200", "212")), ("바나나", one("400", "418")),
-    ("애호박", one("200", "224", "01")), ("콩나물", one("200", "265")), ("부추", one("200", "254")),
+    ("애호박", one("200", "224", "01")), ("콩나물", [("200", "265", None, "07")]), ("부추", one("200", "254")),
     ("깻잎", one("200", "253")), ("상추", one("200", "214")), ("풋고추", one("200", "242", "00")),
     ("깐마늘", one("200", "258")), ("느타리버섯", one("300", "315", "00")), ("새송이버섯", one("300", "317")),
     ("팽이버섯", one("300", "316")), ("브로콜리", one("200", "280")), ("파프리카", one("200", "256")),
@@ -64,7 +64,7 @@ ITEMS = [
     ("돼지고기 앞다리", [("500", "514", "04"), ("500", "4304", "25")]),
     ("삼겹살", [("500", "514", "00"), ("500", "4304", "27")]),
     ("돼지고기 목살", [("500", "514", "02"), ("500", "4304", "68")]),
-    ("소고기 불고기", [("500", "512", "13"), ("500", "512", "23")]),
+    ("소고기 불고기", [("500", "4301", "36"), ("500", "512", "13")]),  # 한우 설도 1등급
     ("소고기 국거리", [("500", "512", "14"), ("500", "4301", "40")]),
     ("닭고기", [("500", "515", None), ("500", "9901", "99")]),
     ("계란", [("500", "516", None), ("500", "9903", "23")]),
@@ -132,13 +132,13 @@ def rows_of(payload):
     return list(item or []), int(body.get("totalCount") or 0)
 
 
-def fetch_item(key, ctgry, item, vrty, start, end):
+def fetch_item(key, ctgry, item, vrty, start, end, se=RETAIL):
     rows, page = [], 1
     while True:
         params = {
             "serviceKey": key, "returnType": "JSON", "pageNo": page, "numOfRows": 1000,
             "cond[exmn_ymd::GTE]": start, "cond[exmn_ymd::LTE]": end,
-            "cond[se_cd::EQ]": RETAIL, "cond[ctgry_cd::EQ]": ctgry, "cond[item_cd::EQ]": item,
+            "cond[se_cd::EQ]": se, "cond[ctgry_cd::EQ]": ctgry, "cond[item_cd::EQ]": item,
         }
         if vrty:
             params["cond[vrty_cd::EQ]"] = vrty
@@ -186,9 +186,10 @@ def per_kg_of(name, unit, price):
     return round(price / grams * 1000) if grams > 0 else None
 
 
-def summarize(name, rows):
-    """시장별 행들 → {key, unit, price, weekAgo, date}. 쓸 만한 게 없으면 None."""
-    rows = [r for r in rows if str(r.get("se_cd", RETAIL)) == RETAIL and (number(r.get("exmn_dd_prc")) or 0) > 0]
+def summarize(name, rows, se=RETAIL):
+    """시장별 행들 → {key, unit, price, weekAgo, date}. 쓸 만한 게 없으면 None.
+    se 는 구분코드 (01 소매, 07 친환경. 콩나물은 친환경만 있다)."""
+    rows = [r for r in rows if str(r.get("se_cd", se)) == se and (number(r.get("exmn_dd_prc")) or 0) > 0]
     if not rows:
         return None
     groups = {}
@@ -200,7 +201,8 @@ def summarize(name, rows):
     def rank(item):
         (_, grade, _, _), rs = item
         on_latest = sum(1 for r in rs if r["exmn_ymd"] == latest)
-        return (grade == "상품", on_latest, len(rs))
+        # 채소·과일은 '상품', 한우는 가장 흔한 '1등급'
+        return (grade == "상품", grade == "1등급", on_latest, len(rs))
 
     _, chosen = max(groups.items(), key=rank)
 
@@ -397,9 +399,9 @@ def main(path):
     items, fresh = [], 0
     for name, sources in ITEMS:
         got = None
-        for ctgry, item, vrty in sources:
+        for ctgry, item, vrty, *se in sources:
             try:
-                got = summarize(name, fetch_item(key, ctgry, item, vrty, start, end))
+                got = summarize(name, fetch_item(key, ctgry, item, vrty, start, end, *se), *se)
             except RuntimeError as e:
                 print(f"{name} ({ctgry}/{item}): {e}", file=sys.stderr)
             if got:
@@ -452,6 +454,13 @@ def self_test():
     assert per_kg_of("배추", "1포기", 2712) == 1356
     assert per_kg_of("새우", "10마리", 5455) == 21820
     assert per_kg_of("모르는것", "1개", 1000) is None
+    # 한우처럼 등급이 여럿이면 1등급
+    beef = [row("20261107", "a", "9,000", grade="1++등급", unit="g", size="100"), row("20261107", "a", "7,600", grade="1등급", unit="g", size="100"),
+            row("20261107", "a", "8,200", grade="1+등급", unit="g", size="100")]
+    assert summarize("소고기 국거리", beef)["perKg"] == 76000
+    # 콩나물은 친환경(07)
+    sprout = [dict(row("20261107", "a", "1,990", unit="g", size="300"), se_cd="07")]
+    assert summarize("콩나물", sprout) is None and summarize("콩나물", sprout, "07")["perKg"] == 6633
     # 7일 전이 없으면 하루 앞뒤에서 찾는다
     s = summarize("배추", [row("20261107", "a", "3120", unit="포기", size="1"), row("20261101", "a", "3500", unit="포기", size="1")])
     assert s["weekAgo"] == 3500 and s["unit"] == "1포기", s
