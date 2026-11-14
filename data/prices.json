@@ -1,167 +1,167 @@
 {
  "version": 1,
  "source": "농산물유통정보(KAMIS) 전국 평균 소매가",
- "surveyDate": "2026-11-11",
+ "surveyDate": "2026-11-13",
  "items": [
   {
    "key": "귤",
    "unit": "10개",
-   "price": 3595,
-   "date": "2026-11-11",
-   "perKg": 3595,
-   "weekAgo": 4055
+   "price": 3852,
+   "date": "2026-11-13",
+   "perKg": 3852,
+   "weekAgo": 3589
   },
   {
    "key": "시금치",
    "unit": "100g",
-   "price": 878,
-   "date": "2026-11-11",
-   "perKg": 8780,
-   "weekAgo": 840
+   "price": 979,
+   "date": "2026-11-13",
+   "perKg": 9790,
+   "weekAgo": 839
   },
   {
    "key": "굴",
    "unit": "1kg",
-   "price": 19045,
-   "date": "2026-11-11",
-   "perKg": 19045,
-   "weekAgo": 19617
+   "price": 20068,
+   "date": "2026-11-13",
+   "perKg": 20068,
+   "weekAgo": 18732
   },
   {
    "key": "미나리",
    "unit": "100g",
-   "price": 1561,
-   "date": "2026-11-11",
-   "perKg": 15610,
-   "weekAgo": 1699
+   "price": 1516,
+   "date": "2026-11-13",
+   "perKg": 15160,
+   "weekAgo": 1628
   },
   {
    "key": "양파",
    "unit": "1kg",
-   "price": 2124,
-   "date": "2026-11-11",
-   "perKg": 2124,
-   "weekAgo": 2167
+   "price": 1946,
+   "date": "2026-11-13",
+   "perKg": 1946,
+   "weekAgo": 1893
   },
   {
    "key": "감자",
    "unit": "100g",
-   "price": 335,
-   "date": "2026-11-11",
-   "perKg": 3350,
-   "weekAgo": 337
+   "price": 340,
+   "date": "2026-11-13",
+   "perKg": 3400,
+   "weekAgo": 338
   },
   {
    "key": "오이",
    "unit": "10개",
-   "price": 8942,
-   "date": "2026-11-11",
-   "perKg": 4471,
-   "weekAgo": 6742
+   "price": 10978,
+   "date": "2026-11-13",
+   "perKg": 5489,
+   "weekAgo": 8090
   },
   {
    "key": "수박",
    "unit": "1개",
-   "price": 19118,
-   "date": "2026-11-11",
-   "perKg": 2731,
-   "weekAgo": 20272
+   "price": 19669,
+   "date": "2026-11-13",
+   "perKg": 2810,
+   "weekAgo": 20011
   },
   {
    "key": "포도",
    "unit": "2kg",
-   "price": 10309,
-   "date": "2026-11-11",
-   "perKg": 5154,
-   "weekAgo": 11587
+   "price": 11051,
+   "date": "2026-11-13",
+   "perKg": 5526,
+   "weekAgo": 9645
   },
   {
    "key": "배",
    "unit": "10개",
-   "price": 24780,
-   "date": "2026-11-11",
-   "perKg": 4130,
-   "weekAgo": 26161
+   "price": 25866,
+   "date": "2026-11-13",
+   "perKg": 4311,
+   "weekAgo": 24596
   },
   {
    "key": "꽃게",
    "unit": "1kg",
-   "price": 15836,
-   "date": "2026-11-11",
-   "perKg": 15836,
-   "weekAgo": 15915
+   "price": 15485,
+   "date": "2026-11-13",
+   "perKg": 15485,
+   "weekAgo": 15848
   },
   {
    "key": "사과",
    "unit": "10개",
-   "price": 19833,
-   "date": "2026-11-11",
-   "perKg": 6611,
-   "weekAgo": 21385
+   "price": 18281,
+   "date": "2026-11-13",
+   "perKg": 6094,
+   "weekAgo": 18448
   },
   {
    "key": "고구마",
    "unit": "1kg",
-   "price": 4270,
-   "date": "2026-11-11",
-   "perKg": 4270,
-   "weekAgo": 3839
+   "price": 4686,
+   "date": "2026-11-13",
+   "perKg": 4686,
+   "weekAgo": 3871
   },
   {
    "key": "배추",
    "unit": "1포기",
-   "price": 2647,
-   "date": "2026-11-11",
-   "perKg": 1324,
-   "weekAgo": 3768
+   "price": 2469,
+   "date": "2026-11-13",
+   "perKg": 1234,
+   "weekAgo": 2823
   },
   {
    "key": "대파",
    "unit": "1kg",
-   "price": 2572,
-   "date": "2026-11-11",
-   "perKg": 2572,
-   "weekAgo": 2497
+   "price": 2297,
+   "date": "2026-11-13",
+   "perKg": 2297,
+   "weekAgo": 2597
   },
   {
    "key": "무",
    "unit": "1개",
-   "price": 1777,
-   "date": "2026-11-11",
-   "perKg": 1185,
-   "weekAgo": 1989
+   "price": 1835,
+   "date": "2026-11-13",
+   "perKg": 1223,
+   "weekAgo": 1836
   },
   {
    "key": "당근",
    "unit": "1kg",
-   "price": 4721,
-   "date": "2026-11-11",
-   "perKg": 4721,
-   "weekAgo": 4560
+   "price": 4684,
+   "date": "2026-11-13",
+   "perKg": 4684,
+   "weekAgo": 4673
   },
   {
    "key": "양배추",
    "unit": "1포기",
-   "price": 4660,
-   "date": "2026-11-11",
-   "perKg": 2330,
-   "weekAgo": 4636
+   "price": 4396,
+   "date": "2026-11-13",
+   "perKg": 2198,
+   "weekAgo": 4701
   },
   {
    "key": "바나나",
    "unit": "100g",
-   "price": 284,
-   "date": "2026-11-11",
-   "perKg": 2840,
-   "weekAgo": 337
+   "price": 279,
+   "date": "2026-11-13",
+   "perKg": 2790,
+   "weekAgo": 292
   },
   {
    "key": "애호박",
    "unit": "1개",
-   "price": 1825,
-   "date": "2026-11-11",
-   "perKg": 6083,
-   "weekAgo": 1435
+   "price": 1862,
+   "date": "2026-11-13",
+   "perKg": 6207,
+   "weekAgo": 1556
   },
   {
    "key": "콩나물",
@@ -174,194 +174,194 @@
   {
    "key": "부추",
    "unit": "100g",
-   "price": 750,
-   "date": "2026-11-11",
-   "perKg": 7500,
-   "weekAgo": 679
+   "price": 857,
+   "date": "2026-11-13",
+   "perKg": 8570,
+   "weekAgo": 719
   },
   {
    "key": "깻잎",
    "unit": "50g",
-   "price": 1458,
-   "date": "2026-11-11",
-   "perKg": 29160,
-   "weekAgo": 1214
+   "price": 1537,
+   "date": "2026-11-13",
+   "perKg": 30740,
+   "weekAgo": 1406
   },
   {
    "key": "상추",
    "unit": "100g",
-   "price": 1055,
-   "date": "2026-11-11",
-   "perKg": 10550,
-   "weekAgo": 940
+   "price": 1226,
+   "date": "2026-11-13",
+   "perKg": 12260,
+   "weekAgo": 1011
   },
   {
    "key": "풋고추",
    "unit": "100g",
-   "price": 1739,
-   "date": "2026-11-11",
-   "perKg": 17390,
-   "weekAgo": 1570
+   "price": 1717,
+   "date": "2026-11-13",
+   "perKg": 17170,
+   "weekAgo": 1684
   },
   {
    "key": "깐마늘",
    "unit": "1kg",
-   "price": 12056,
-   "date": "2026-11-11",
-   "perKg": 12056,
-   "weekAgo": 12222
+   "price": 10150,
+   "date": "2026-11-13",
+   "perKg": 10150,
+   "weekAgo": 11982
   },
   {
    "key": "느타리버섯",
    "unit": "100g",
-   "price": 1041,
-   "date": "2026-11-11",
-   "perKg": 10410,
-   "weekAgo": 1013
+   "price": 1058,
+   "date": "2026-11-13",
+   "perKg": 10580,
+   "weekAgo": 1036
   },
   {
    "key": "새송이버섯",
    "unit": "100g",
-   "price": 562,
-   "date": "2026-11-11",
-   "perKg": 5620,
-   "weekAgo": 529
+   "price": 523,
+   "date": "2026-11-13",
+   "perKg": 5230,
+   "weekAgo": 530
   },
   {
    "key": "팽이버섯",
    "unit": "150g",
-   "price": 509,
-   "date": "2026-11-11",
-   "perKg": 3393,
-   "weekAgo": 518
+   "price": 519,
+   "date": "2026-11-13",
+   "perKg": 3460,
+   "weekAgo": 504
   },
   {
    "key": "브로콜리",
    "unit": "1개",
-   "price": 2191,
-   "date": "2026-11-11",
-   "perKg": 7303,
-   "weekAgo": 2526
+   "price": 2248,
+   "date": "2026-11-13",
+   "perKg": 7493,
+   "weekAgo": 2307
   },
   {
    "key": "파프리카",
    "unit": "1개",
-   "price": 1397,
-   "date": "2026-11-11",
-   "perKg": 6985,
-   "weekAgo": 1391
+   "price": 1268,
+   "date": "2026-11-13",
+   "perKg": 6340,
+   "weekAgo": 1364
   },
   {
    "key": "돼지고기 앞다리",
    "unit": "100g",
-   "price": 1592,
-   "date": "2026-11-11",
-   "perKg": 15920,
-   "weekAgo": 1620
+   "price": 1556,
+   "date": "2026-11-13",
+   "perKg": 15560,
+   "weekAgo": 1601
   },
   {
    "key": "삼겹살",
    "unit": "100g",
-   "price": 2858,
-   "date": "2026-11-11",
-   "perKg": 28580,
-   "weekAgo": 2958
+   "price": 2815,
+   "date": "2026-11-13",
+   "perKg": 28150,
+   "weekAgo": 2717
   },
   {
    "key": "돼지고기 목살",
    "unit": "100g",
-   "price": 2694,
-   "date": "2026-11-11",
-   "perKg": 26940,
-   "weekAgo": 2749
+   "price": 2643,
+   "date": "2026-11-13",
+   "perKg": 26430,
+   "weekAgo": 2539
   },
   {
    "key": "소고기 불고기",
    "unit": "100g",
-   "price": 5012,
-   "date": "2026-11-11",
-   "perKg": 50120,
-   "weekAgo": 5217
+   "price": 5360,
+   "date": "2026-11-13",
+   "perKg": 53600,
+   "weekAgo": 4931
   },
   {
    "key": "소고기 국거리",
    "unit": "100g",
-   "price": 7101,
-   "date": "2026-11-11",
-   "perKg": 71010,
-   "weekAgo": 7171
+   "price": 7138,
+   "date": "2026-11-13",
+   "perKg": 71380,
+   "weekAgo": 6988
   },
   {
    "key": "닭고기",
    "unit": "1kg",
-   "price": 5635,
-   "date": "2026-11-11",
-   "perKg": 5635,
-   "weekAgo": 5698
+   "price": 5326,
+   "date": "2026-11-13",
+   "perKg": 5326,
+   "weekAgo": 5477
   },
   {
    "key": "계란",
    "unit": "30구",
-   "price": 7271,
-   "date": "2026-11-11",
-   "perKg": 4039,
-   "weekAgo": 6952
+   "price": 7196,
+   "date": "2026-11-13",
+   "perKg": 3998,
+   "weekAgo": 7271
   },
   {
    "key": "고등어",
    "unit": "1마리",
-   "price": 4105,
-   "date": "2026-11-11",
-   "perKg": 10262,
-   "weekAgo": 4081
+   "price": 4441,
+   "date": "2026-11-13",
+   "perKg": 11102,
+   "weekAgo": 3814
   },
   {
    "key": "갈치",
    "unit": "1마리",
-   "price": 7530,
-   "date": "2026-11-11",
-   "perKg": 18825,
-   "weekAgo": 7536
+   "price": 7174,
+   "date": "2026-11-13",
+   "perKg": 17935,
+   "weekAgo": 7011
   },
   {
    "key": "오징어",
    "unit": "1마리",
-   "price": 3929,
-   "date": "2026-11-11",
-   "perKg": 13097,
-   "weekAgo": 3760
+   "price": 5155,
+   "date": "2026-11-13",
+   "perKg": 17183,
+   "weekAgo": 5326
   },
   {
    "key": "동태",
    "unit": "1마리",
-   "price": 4245,
-   "date": "2026-11-11",
-   "perKg": 8490,
+   "price": 4087,
+   "date": "2026-11-13",
+   "perKg": 8174,
    "weekAgo": 4207
   },
   {
    "key": "새우",
    "unit": "10마리",
-   "price": 5454,
-   "date": "2026-11-11",
-   "perKg": 21816,
+   "price": 4943,
+   "date": "2026-11-13",
+   "perKg": 19772,
    "weekAgo": 5398
   },
   {
    "key": "홍합",
    "unit": "1kg",
-   "price": 3686,
-   "date": "2026-11-11",
-   "perKg": 3686,
-   "weekAgo": 3735
+   "price": 3602,
+   "date": "2026-11-13",
+   "perKg": 3602,
+   "weekAgo": 3723
   },
   {
    "key": "바지락",
    "unit": "1kg",
-   "price": 9417,
-   "date": "2026-11-11",
-   "perKg": 9417,
-   "weekAgo": 10680
+   "price": 10610,
+   "date": "2026-11-13",
+   "perKg": 10610,
+   "weekAgo": 9180
   },
   {
    "key": "두부",
