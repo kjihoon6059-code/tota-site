@@ -16,6 +16,9 @@
 온라인 쇼핑몰 상품마다 이름에서 무게를 읽어 kg당 값을 내고, 가운데 값을 쓴다.
 이 API는 한 달쯤 늦게 채워질 수 있어서 최근 70일 안에서 가장 새 값을 쓴다. 못 받아도 실패로 치지 않는다.
 
+KAMIS는 전통시장까지 낸 평균이라 마트보다 낮게 나오는 재료가 있어서, 참가격 신선식품(대형마트 조사)이 있는 재료는
+'오늘 뭐 먹지'에 쓰는 perKg만 마트 수준으로 맞춘다 (아래 CHAMGA_FRESH, mart_adjust). 보이는 소매가(price)는 KAMIS 그대로.
+
 받기에 실패한 품목은 지난 파일의 값을 그대로 둔다. 하나도 못 받으면 파일을 안 바꾸고 실패로 끝난다.
 표준 라이브러리만 쓴다 (Actions에서 설치 없이 돈다).
 
@@ -188,9 +191,10 @@ def per_kg_of(name, unit, price):
     return round(price / grams * 1000) if grams > 0 else None
 
 
-def summarize(name, rows, se=RETAIL):
+def summarize(name, rows, se=RETAIL, near=None):
     """시장별 행들 → {key, unit, price, weekAgo, date}. 쓸 만한 게 없으면 None.
-    se 는 구분코드 (01 소매, 07 친환경. 콩나물은 친환경만 있다)."""
+    se 는 구분코드 (01 소매, 07 친환경. 콩나물은 친환경만 있다).
+    near("2026-10-23")를 주면 같은 품종·등급·단위로 그날(앞뒤 4일 안 가장 가까운 날)의 kg당 값을 "_kgNear"에 붙인다 (마트 보정용)."""
     rows = [r for r in rows if str(r.get("se_cd", se)) == se and (number(r.get("exmn_dd_prc")) or 0) > 0]
     if not rows:
         return None
@@ -228,6 +232,15 @@ def summarize(name, rows, se=RETAIL):
             if week_ago:
                 out["weekAgo"] = week_ago
             break
+    if near:
+        n = dt.date.fromisoformat(near)
+        for gap in (0, -1, 1, -2, 2, -3, 3, -4, 4):
+            target = (n + dt.timedelta(days=gap)).strftime("%Y%m%d")
+            if target in by_day:
+                kg = per_kg_of(name, out["unit"], average(by_day[target], "exmn_dd_prc"))
+                if kg:
+                    out["_kgNear"] = kg
+                break
     return out
 
 
@@ -446,15 +459,19 @@ def summarize_chamga(name, rows, must, avoid):
     return {"key": name, "unit": "1kg", "price": per_kg, "perKg": per_kg, "date": day, "source": CHAMGA_SOURCE}
 
 
-def fetch_chamga(names):
-    """names 중 참가격에 있는 것. 실패해도 빈 목록."""
-    wanted = [i for i in CHAMGA_ITEMS if i[0] in names]
-    if not wanted:
-        return []
+def chamga_rows():
+    """참가격 파일 행 목록. 못 받으면 빈 목록 (가공식품 값과 마트 보정만 빠진다)."""
     try:
-        rows = list(csv.DictReader(io.StringIO(chamga_csv())))
+        return list(csv.DictReader(io.StringIO(chamga_csv())))
     except (RuntimeError, OSError, ValueError) as e:
         print(f"참가격 파일: {e}", file=sys.stderr)
+        return []
+
+
+def fetch_chamga(names, rows):
+    """names 중 참가격에 있는 것. 실패해도 빈 목록."""
+    wanted = [i for i in CHAMGA_ITEMS if i[0] in names]
+    if not wanted or not rows:
         return []
     out = []
     for name, must, avoid in wanted:
@@ -467,6 +484,76 @@ def fetch_chamga(names):
     return out
 
 
+# ---------- 마트 보정: KAMIS(전통시장 포함 평균)를 참가격 대형마트 값 수준으로 ----------
+# KAMIS 소매가는 전통시장까지 낸 평균이라 마트보다 15~45% 낮게 나오는 재료가 있다 (2026-11 대파·고구마·새우·상추 등).
+# 참가격 신선식품 값(대형마트 조사, 2주에 한 번)과 같은 날 KAMIS 값의 비율을 지금 KAMIS kg값에 곱해서 perKg만 바꾼다.
+# 주간 오르내림은 KAMIS를 따르고, 높이만 마트에 맞춘다. price·unit·weekAgo(제철 카드·값 맞히기·내 기록 비교)는 KAMIS 그대로.
+# (앱 재료 이름, [참가격 상품명 그대로], 그 상품 한 단위 무게 g). 무게는 앱 BuyUnits 단위와 맞춰서 '장볼 때' 값이 마트 값과 같아지게.
+# 계란은 앱이 30구 단위로 바뀌면 KAMIS 30구 값이 맞아서 뺀다.
+CHAMGA_FRESH = [
+    ("배추", ["배추(1.5~2kg)"], 2000),
+    ("무", ["무(줄기 없는 무, 1.5kg)"], 1500),
+    ("대파", ["대파(흙대파, 500~800g)"], 700),
+    ("양파", ["양파(껍질 있는 망포장, 1.5kg)"], 1500),
+    ("감자", ["감자(껍질 있는 감자, 100g)"], 100),
+    ("고구마", ["고구마(껍질 있는 밤고구마, 100g)", "고구마(껍질 있는 호박고구마, 100g)"], 100),
+    ("당근", ["당근(흙당근, 100g)"], 100),
+    ("애호박", ["애호박"], 300),
+    ("오이", ["오이(백다다기)"], 200),
+    ("양배추", ["양배추"], 2000),
+    ("풋고추", ["풋고추(100g)"], 100),
+    ("깐마늘", ["마늘(깐마늘, 100g)"], 100),
+    ("깻잎", ["깻잎(100g)"], 100),
+    ("상추", ["적상추(100g)"], 100),
+    ("시금치", ["시금치(250~400g)"], 300),
+    ("느타리버섯", ["느타리버섯(100g)"], 100),
+    ("돼지고기 목살", ["돼지고기 목살(100g)"], 100),
+    ("삼겹살", ["돼지고기 삼겹살(100g)"], 100),
+    ("소고기 불고기", ["쇠고기 불고기(1등급, 100g)"], 100),
+    ("새우", ["흰다리새우(100g)"], 100),
+    ("고등어", ["고등어(생물, 300~500g)"], 400),
+    ("갈치", ["갈치(생물, 100g)"], 100),
+    ("오징어", ["오징어(생물, 200~300g)"], 300),
+]
+MART_MIN_STORES = 3
+MART_RATIO = (0.5, 2.5)  # 이 밖이면 상품이 바뀌었거나 잘못 읽은 것으로 보고 안 쓴다
+
+
+def chamga_fresh(rows):
+    """참가격 행 → {앱 이름: (조사일, 마트 kg당 가운데 값, 가게 수)}. 가장 최근 조사일에 가게가 셋 이상인 것만."""
+    out = {}
+    for name, titles, grams in CHAMGA_FRESH:
+        by_day = {}
+        for r in rows:
+            if r.get("상품명") in titles:
+                price, day = number(r.get("판매가격")), (r.get("조사일") or "")[:10]
+                if price and price > 0 and len(day) == 10:
+                    by_day.setdefault(day, []).append(price / grams * 1000)
+        if not by_day:
+            continue
+        day = max(by_day)
+        if len(by_day[day]) >= MART_MIN_STORES:
+            out[name] = (day, round(statistics.median(by_day[day])), len(by_day[day]))
+    return out
+
+
+def mart_adjust(item, mart):
+    """KAMIS 항목 하나에 마트 비율을 곱한다. 바꿨으면 True. item의 "_kgNear"는 지운다."""
+    near = item.pop("_kgNear", None)
+    if not mart or not near or not item.get("perKg"):
+        return False
+    day, mart_kg, stores = mart
+    ratio = mart_kg / near
+    if not MART_RATIO[0] <= ratio <= MART_RATIO[1]:
+        print(f"{item['key']}: 마트 비율 {ratio:.2f} 이 너무 커서 안 씀 (참가격 {day} kg {mart_kg:,} / KAMIS {near:,})", file=sys.stderr)
+        return False
+    kamis = item["perKg"]
+    item["perKg"] = round(kamis * ratio / 10) * 10
+    item["mart"] = {"date": day, "ratio": round(ratio, 2)}
+    print(f"{item['key']}: 마트 보정 kg {kamis:,} → {item['perKg']:,}원 (×{ratio:.2f}, 참가격 {day} 가게 {stores}곳)")
+    return True
+
+
 def main(path):
     key = service_key()
     today = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()
@@ -476,12 +563,17 @@ def main(path):
         old = {i["key"]: i for i in json.load(open(path, encoding="utf-8")).get("items", [])}
     except (OSError, ValueError):
         old = {}
-    items, fresh = [], 0
+    cg = chamga_rows()
+    marts = chamga_fresh(cg)
+    items, fresh, adjusted = [], 0, 0
     for name, sources in ITEMS:
         got = None
+        mart = marts.get(name)
+        # 마트 보정할 재료는 참가격 조사일까지 거슬러 받는다 (그날 KAMIS 값과 비교하려고)
+        frm = min(start, (dt.date.fromisoformat(mart[0]) - dt.timedelta(days=5)).strftime("%Y%m%d")) if mart else start
         for ctgry, item, vrty, *se in sources:
             try:
-                got = summarize(name, fetch_item(key, ctgry, item, vrty, start, end, *se), *se)
+                got = summarize(name, fetch_item(key, ctgry, item, vrty, frm, end, *se), *se, near=mart[0] if mart else None)
             except RuntimeError as e:
                 print(f"{name} ({ctgry}/{item}): {e}", file=sys.stderr)
             if got:
@@ -489,6 +581,7 @@ def main(path):
         if got:
             fresh += 1
             print(f"{name}: {got['unit']} {got['price']:,}원 (kg {got.get('perKg')}, 1주 전 {got.get('weekAgo')}) {got['date']}")
+            adjusted += mart_adjust(got, mart)
             items.append(got)
         elif name in old:
             print(f"{name}: 못 받아서 지난 값 유지", file=sys.stderr)
@@ -498,7 +591,7 @@ def main(path):
     if fresh == 0:
         sys.exit("하나도 못 받았어요. 키·승인 상태를 확인해 주세요. 파일은 그대로 둡니다.")
     online = {i["key"]: i for i in fetch_online(key, today)}
-    online.update({i["key"]: i for i in fetch_chamga({n for n, *_ in ONLINE_ITEMS} - set(online))})
+    online.update({i["key"]: i for i in fetch_chamga({n for n, *_ in ONLINE_ITEMS} - set(online), cg)})
     for name, *_ in ONLINE_ITEMS:
         if name in online:
             items.append(online[name])
@@ -515,7 +608,7 @@ def main(path):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(board, f, ensure_ascii=False, indent=1)
         f.write("\n")
-    print(f"{fresh}/{len(ITEMS)} 품목 새로 받음 → {path}")
+    print(f"{fresh}/{len(ITEMS)} 품목 새로 받음, 마트 보정 {adjusted}/{len(CHAMGA_FRESH)} → {path}")
 
 
 def self_test():
@@ -589,6 +682,25 @@ def self_test():
     s = summarize_chamga("두부", cg, ["두부"], ["진밥"])
     assert s == {"key": "두부", "unit": "1kg", "price": 7000, "perKg": 7000, "date": "2026-10-23", "source": CHAMGA_SOURCE}, s
     assert summarize_chamga("두부", cg[:2], ["두부"], []) is None
+    # 마트 보정: 참가격 대파 1단(700g으로 셈) 가운데 값 2,990원 → kg 4,271원
+    fresh = [{"상품명": "대파(흙대파, 500~800g)", "조사일": d, "판매가격": p} for d, p in [
+        ("2026-10-23", "2,990"), ("2026-10-23", "2,990"), ("2026-10-23", "3,480"), ("2026-10-23", "2,480"),
+        ("2026-10-09", "9,999"), ("2026-10-09", "9,999"), ("2026-10-09", "9,999")]]
+    fresh += [{"상품명": "적상추(100g)", "조사일": "2026-10-23", "판매가격": "1,700"}] * 2  # 가게 둘이면 안 믿는다
+    marts = chamga_fresh(fresh)
+    assert marts == {"대파": ("2026-10-23", 4271, 4)}, marts
+    # 같은 날(없으면 앞뒤 4일 안) KAMIS kg값과 비교: 10-22 2,000원/kg → ×2.14, 지금 2,297원 → 4,910원
+    leek = [row("20261115", "a", "2,297", unit="kg", size="1"), row("20261022", "a", "2,000", unit="kg", size="1")]
+    s = summarize("대파", leek, near="2026-10-23")
+    assert s["_kgNear"] == 2000 and s["perKg"] == 2297, s
+    assert mart_adjust(s, marts["대파"]) and s["perKg"] == 4910 and s["mart"] == {"date": "2026-10-23", "ratio": 2.14}, s
+    assert "_kgNear" not in s and s["price"] == 2297  # 보이는 소매가는 KAMIS 그대로
+    # 비율이 터무니없으면(상품이 바뀐 것) 안 바꾼다
+    s = summarize("대파", [row("20261115", "a", "2,297", unit="kg", size="1"), row("20261023", "a", "500", unit="kg", size="1")], near="2026-10-23")
+    assert not mart_adjust(s, marts["대파"]) and s["perKg"] == 2297 and "mart" not in s and "_kgNear" not in s
+    # 그날 KAMIS 값이 없으면 보정 안 함
+    s = summarize("대파", leek[:1], near="2026-10-23")
+    assert "_kgNear" not in s and not mart_adjust(s, marts["대파"])
     print("ok")
 
 

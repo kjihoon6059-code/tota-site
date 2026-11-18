@@ -11,6 +11,11 @@ on:
         description: "코드 찾기만 (예: 200/265 500/512). 비우면 평소처럼 가격 받기"
         required: false
         default: ""
+      dry:
+        description: "시험만 (값을 받아 로그로만 보여 주고 올리지 않음)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -42,8 +47,14 @@ jobs:
         env:
           DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
         run: python3 tools/prices/fetch.py data/prices.json
+      - name: 시험이면 바뀐 것만 보여 주고 되돌리기
+        if: ${{ github.event.inputs.dry == 'true' }}
+        run: |
+          git --no-pager diff --stat -- data/prices.json
+          git --no-pager diff -U0 -- data/prices.json | grep -E '^[+-] ' | head -120 || true
+          git checkout -- data/prices.json
       - name: 바뀌었으면 올리기
-        if: ${{ github.event.inputs.probe == '' || github.event.inputs.probe == null }}
+        if: ${{ (github.event.inputs.probe == '' || github.event.inputs.probe == null) && github.event.inputs.dry != 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
